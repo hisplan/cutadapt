@@ -31,11 +31,8 @@ use Cwd;
 
 # change these paths if needed
 
-#my $path_to_cutadapt = '/home/shahr2/Software/Cutadapt/cutadapt-1.1/bin/cutadapt';
-#my $path_to_fastqc = '/home/shahr2/Software/FastQC/FastQC/fastqc';
-
-my $path_to_cutadapt = '/opt/common/CentOS_6/cutadapt/cutadapt-1.1/bin/cutadapt';
-my $path_to_fastqc = '/opt/common/CentOS_6/fastqc/FastQC_v0.10.1/fastqc';
+my $path_to_cutadapt = '/usr/bin/cutadapt';
+my $path_to_fastqc = '/usr/bin/fastqc';
 
 
 ########################################################################
@@ -422,19 +419,19 @@ sub trim{
       if ( scalar(@filenames)%2 == 0){ # this is read 1 of a pair
 	warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$adapter' from file $filename <<< \n";
 	sleep (3);
-	open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
+	open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
       }
       else{                            # this is read 2 of a pair
 	warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$a2' from file $filename <<< \n";
 	sleep (3);
-	open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $a2 $filename") or die "Failed to launch Cutadapt: $!";
+	open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $a2 $filename") or die "Failed to launch Cutadapt: $!";
       }
     }
     ### Using the same adapter for both read 1 and read 2
     else{
       warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$adapter' from file $filename <<< \n";
       sleep (3);
-      open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
+      open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
     }
 
     close WRITER or die $!; # not needed
