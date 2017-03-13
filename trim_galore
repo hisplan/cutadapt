@@ -31,8 +31,12 @@ use Cwd;
 
 # change these paths if needed
 
-my $path_to_cutadapt = 'cutadapt';
-my $path_to_fastqc = 'fastqc';
+#my $path_to_cutadapt = '/home/shahr2/Software/Cutadapt/cutadapt-1.1/bin/cutadapt';
+#my $path_to_fastqc = '/home/shahr2/Software/FastQC/FastQC/fastqc';
+
+my $path_to_cutadapt = '/opt/common/CentOS_6/cutadapt/cutadapt-1.1/bin/cutadapt';
+my $path_to_fastqc = '/opt/common/CentOS_6/fastqc/FastQC_v0.10.1/fastqc';
+
 
 ########################################################################
 
@@ -85,7 +89,7 @@ sub trim{
   # warn "Here is the outputfile name: $output_filename\n";
 
   my $report = $output_filename;
-  $report =~ s/$/_trimming_report.txt/;
+  $report =~ s/\.fastq\.gz$/_cl.stats/;
 
   if ($no_report_file) {
     $report = File::Spec->devnull;
@@ -418,19 +422,19 @@ sub trim{
       if ( scalar(@filenames)%2 == 0){ # this is read 1 of a pair
 	warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$adapter' from file $filename <<< \n";
 	sleep (3);
-	open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
+	open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
       }
       else{                            # this is read 2 of a pair
 	warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$a2' from file $filename <<< \n";
 	sleep (3);
-	open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $a2 $filename") or die "Failed to launch Cutadapt: $!";
+	open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $a2 $filename") or die "Failed to launch Cutadapt: $!";
       }
     }
     ### Using the same adapter for both read 1 and read 2
     else{
       warn "\n  >>> Now performing quality (cutoff $cutoff) and adapter trimming in a single pass for the adapter sequence: '$adapter' from file $filename <<< \n";
       sleep (3);
-      open3 (\*WRITER, \*TRIM, \*ERROR, "$path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
+      open3 (\*WRITER, \*TRIM, \*ERROR, "/opt/common/CentOS_6/python/python-2.7.3/bin/python $path_to_cutadapt -f fastq -e $error_rate -q $cutoff -O $stringency -a $adapter $filename") or die "Failed to launch Cutadapt: $!";
     }
 
     close WRITER or die $!; # not needed
@@ -664,17 +668,17 @@ sub validate_paired_end_files{
   my $out_2 = $file_2;
 
   if ($out_1 =~ /gz$/){
-    $out_1 =~ s/trimmed\.fq\.gz$/val_1.fq/;
+    $out_1 =~ s/_trimmed\.fq\.gz$/_cl.fastq/;
   }
   else{
-    $out_1 =~ s/trimmed\.fq$/val_1.fq/;
+    $out_1 =~ s/_trimmed\.fq$/_cl.fastq/;
   }
 
   if ($out_2 =~ /gz$/){
-    $out_2 =~ s/trimmed\.fq\.gz$/val_2.fq/;
+    $out_2 =~ s/_trimmed\.fq\.gz$/_cl.fastq/;
   }
   else{
-    $out_2 =~ s/trimmed\.fq$/val_2.fq/;
+    $out_2 =~ s/_trimmed\.fq$/_cl.fastq/;
   }
 
   open (R1,'>',$output_dir.$out_1) or die "Couldn't write to $out_1 $!\n";
@@ -691,17 +695,17 @@ sub validate_paired_end_files{
     $unpaired_2 = $file_2;
 
     if ($unpaired_1 =~ /gz$/){
-      $unpaired_1 =~ s/trimmed\.fq\.gz$/unpaired_1.fq/;
+      $unpaired_1 =~ s/trimmed\.fq\.gz$/-unpaired_1.fastq/;
     }
     else{
-      $unpaired_1 =~ s/trimmed\.fq$/unpaired_1.fq/;
+      $unpaired_1 =~ s/trimmed\.fq$/-unpaired_1.fastq/;
     }
 
     if ($unpaired_2 =~ /gz$/){
-      $unpaired_2 =~ s/trimmed\.fq\.gz$/unpaired_2.fq/;
+      $unpaired_2 =~ s/trimmed\.fq\.gz$/-unpaired_2.fastq/;
     }
     else{
-      $unpaired_2 =~ s/trimmed\.fq$/unpaired_2.fq/;
+      $unpaired_2 =~ s/trimmed\.fq$/-unpaired_2.fastq/;
     }
 
     open (UNPAIRED1,'>',$output_dir.$unpaired_1) or die "Couldn't write to $unpaired_1: $!\n";
@@ -942,7 +946,7 @@ VERSION
 
   if (defined $adapter){
     unless ($adapter =~ /^[ACTGNactgn]+$/){
-      die "Adapter sequence must contain DNA characters only (A,C,T,G or N)!\n";
+      #die "Adapter sequence must contain DNA characters only (A,C,T,G or N)!\n";
     }
     $adapter = uc$adapter;
   }
@@ -952,7 +956,7 @@ VERSION
       die "An optional adapter for read 2 of paired-end files requires '--paired' to be specified as well! Please re-specify\n";
     }
     unless ($adapter2 =~ /^[ACTGNactgn]+$/){
-      die "Optional adapter 2 sequence must contain DNA characters only (A,C,T,G or N)!\n";
+      #die "Optional adapter 2 sequence must contain DNA characters only (A,C,T,G or N)!\n";
     }
     $adapter2 = uc$adapter2;
   }
